@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .calculator {
+            background: #1a1a2e;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            width: 320px;
+        }
+
+        .display {
+            background: #16213e;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: right;
+            overflow: hidden;
+        }
+
+        .display .previous {
+            color: #a0a0a0;
+            font-size: 16px;
+            min-height: 20px;
+            word-wrap: break-word;
+        }
+
+        .display .current {
+            color: #fff;
+            font-size: 36px;
+            font-weight: bold;
+            word-wrap: break-word;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        button {
+            padding: 20px;
+            font-size: 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 600;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        .number {
+            background: #0f3460;
+            color: #fff;
+        }
+
+        .number:hover {
+            background: #1a4a7a;
+        }
+
+        .operator {
+            background: #e94560;
+            color: #fff;
+        }
+
+        .operator:hover {
+            background: #ff6b6b;
+        }
+
+        .equals {
+            background: #00d2d3;
+            color: #1a1a2e;
+            grid-column: span 2;
+        }
+
+        .equals:hover {
+            background: #54a0ff;
+        }
+
+        .clear {
+            background: #ff9f43;
+            color: #1a1a2e;
+        }
+
+        .clear:hover {
+            background: #ffbe76;
+        }
+
+        .span-two {
+            grid-column: span 2;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <div class="display">
+            <div class="previous" id="previous"></div>
+            <div class="current" id="current">0</div>
+        </div>
+        <div class="buttons">
+            <button class="clear span-two" onclick="clearAll()">C</button>
+            <button class="operator" onclick="chooseOperator('/')">÷</button>
+            <button class="operator" onclick="chooseOperator('*')">×</button>
+            <button class="number" onclick="appendNumber('7')">7</button>
+            <button class="number" onclick="appendNumber('8')">8</button>
+            <button class="number" onclick="appendNumber('9')">9</button>
+            <button class="operator" onclick="chooseOperator('-')">−</button>
+            <button class="number" onclick="appendNumber('4')">4</button>
+            <button class="number" onclick="appendNumber('5')">5</button>
+            <button class="number" onclick="appendNumber('6')">6</button>
+            <button class="operator" onclick="chooseOperator('+')">+</button>
+            <button class="number" onclick="appendNumber('1')">1</button>
+            <button class="number" onclick="appendNumber('2')">2</button>
+            <button class="number" onclick="appendNumber('3')">3</button>
+            <button class="equals span-two" onclick="calculate()">=</button>
+            <button class="number span-two" onclick="appendNumber('0')">0</button>
+            <button class="number" onclick="appendDecimal()">.</button>
+        </div>
+    </div>
+
+    <script>
+        let currentValue = '0';
+        let previousValue = '';
+        let operator = null;
+        let shouldResetDisplay = false;
+
+        const currentDisplay = document.getElementById('current');
+        const previousDisplay = document.getElementById('previous');
+
+        function updateDisplay() {
+            currentDisplay.textContent = currentValue;
+            if (operator !== null) {
+                previousDisplay.textContent = `${previousValue} ${getOperatorSymbol(operator)}`;
+            } else {
+                previousDisplay.textContent = previousValue;
+            }
+        }
+
+        function getOperatorSymbol(op) {
+            const symbols = { '+': '+', '-': '−', '*': '×', '/': '÷' };
+            return symbols[op] || op;
+        }
+
+        function appendNumber(number) {
+            if (currentValue === '0' || shouldResetDisplay) {
+                currentValue = number;
+                shouldResetDisplay = false;
+            } else {
+                currentValue += number;
+            }
+            updateDisplay();
+        }
+
+        function appendDecimal() {
+            if (shouldResetDisplay) {
+                currentValue = '0.';
+                shouldResetDisplay = false;
+                return;
+            }
+            if (!currentValue.includes('.')) {
+                currentValue += '.';
+            }
+            updateDisplay();
+        }
+
+        function clearAll() {
+            currentValue = '0';
+            previousValue = '';
+            operator = null;
+            shouldResetDisplay = false;
+            updateDisplay();
+        }
+
+        function chooseOperator(op) {
+            if (operator !== null && !shouldResetDisplay) {
+                calculate();
+            }
+            previousValue = currentValue;
+            operator = op;
+            shouldResetDisplay = true;
+            updateDisplay();
+        }
+
+        function calculate() {
+            if (operator === null || shouldResetDisplay) return;
+
+            const prev = parseFloat(previousValue);
+            const current = parseFloat(currentValue);
+            let result;
+
+            switch (operator) {
+                case '+':
+                    result = prev + current;
+                    break;
+                case '-':
+                    result = prev - current;
+                    break;
+                case '*':
+                    result = prev * current;
+                    break;
+                case '/':
+                    if (current === 0) {
+                        alert('No se puede dividir entre cero');
+                        clearAll();
+                        return;
+                    }
+                    result = prev / current;
+                    break;
+                default:
+                    return;
+            }
+
+            // Redondear para evitar errores de punto flotante
+            result = Math.round(result * 100000000) / 100000000;
+
+            currentValue = result.toString();
+            previousValue = '';
+            operator = null;
+            shouldResetDisplay = true;
+            updateDisplay();
+        }
+
+        // Soporte de teclado
+        document.addEventListener('keydown', (event) => {
+            if (event.key >= '0' && event.key <= '9') appendNumber(event.key);
+            if (event.key === '.') appendDecimal();
+            if (event.key === '+') chooseOperator('+');
+            if (event.key === '-') chooseOperator('-');
+            if (event.key === '*') chooseOperator('*');
+            if (event.key === '/') {
+                event.preventDefault();
+                chooseOperator('/');
+            }
+            if (event.key === 'Enter' || event.key === '=') calculate();
+            if (event.key === 'Escape' || event.key === 'c' || event.key === 'C') clearAll();
+        });
+    </script>
+</body>
+</html>

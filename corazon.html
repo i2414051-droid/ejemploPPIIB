@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corazón</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+        }
+
+        .container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .heart-wrapper {
+            position: relative;
+            width: 200px;
+            height: 200px;
+        }
+
+        .heart {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            animation: heartbeat 1.2s ease-in-out infinite;
+        }
+
+        .heart svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 0 20px rgba(233, 69, 96, 0.6));
+        }
+
+        .heart-path {
+            fill: url(#heartGradient);
+            stroke: #ff6b6b;
+            stroke-width: 2;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            14% { transform: scale(1.15); }
+            28% { transform: scale(1); }
+            42% { transform: scale(1.15); }
+            70% { transform: scale(1); }
+        }
+
+        .heart:active {
+            animation: none;
+            transform: scale(1.3);
+        }
+
+        .particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #e94560;
+            border-radius: 50%;
+            opacity: 0;
+            animation: particleFloat 2s ease-out infinite;
+        }
+
+        @keyframes particleFloat {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(var(--tx), var(--ty)) scale(0);
+            }
+        }
+
+        .message {
+            color: #fff;
+            font-size: 24px;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(233, 69, 96, 0.5);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .counter {
+            color: #ff6b6b;
+            font-size: 18px;
+            background: rgba(233, 69, 96, 0.1);
+            padding: 10px 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(233, 69, 96, 0.3);
+        }
+
+        .glow-ring {
+            position: absolute;
+            width: 220px;
+            height: 220px;
+            border: 2px solid rgba(233, 69, 96, 0.3);
+            border-radius: 50%;
+            animation: ringPulse 2s ease-out infinite;
+        }
+
+        .glow-ring:nth-child(2) {
+            animation-delay: 0.5s;
+        }
+
+        .glow-ring:nth-child(3) {
+            animation-delay: 1s;
+        }
+
+        @keyframes ringPulse {
+            0% {
+                transform: scale(0.8);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1.5);
+                opacity: 0;
+            }
+        }
+
+        .sparkle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #fff;
+            border-radius: 50%;
+            animation: sparkle 1.5s ease-in-out infinite;
+        }
+
+        @keyframes sparkle {
+            0%, 100% { opacity: 0; transform: scale(0); }
+            50% { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="heart-wrapper">
+            <div class="glow-ring"></div>
+            <div class="glow-ring"></div>
+            <div class="glow-ring"></div>
+            <div class="particles" id="particles"></div>
+            <div class="heart" id="heart" onclick="createParticles()">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="heartGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#e94560"/>
+                            <stop offset="50%" style="stop-color:#ff6b6b"/>
+                            <stop offset="100%" style="stop-color:#ee5a24"/>
+                        </linearGradient>
+                    </defs>
+                    <path class="heart-path" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                </svg>
+            </div>
+        </div>
+        <div class="message">❤️ ¡Haz clic en el corazón! ❤️</div>
+        <div class="counter">Clics: <span id="clickCount">0</span></div>
+    </div>
+
+    <script>
+        let clickCount = 0;
+        const particlesContainer = document.getElementById('particles');
+        const clickCountDisplay = document.getElementById('clickCount');
+        const heart = document.getElementById('heart');
+
+        function createParticles() {
+            clickCount++;
+            clickCountDisplay.textContent = clickCount;
+
+            // Crear partículas
+            for (let i = 0; i < 12; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                const angle = (i / 12) * Math.PI * 2;
+                const distance = 80 + Math.random() * 60;
+                const tx = Math.cos(angle) * distance;
+                const ty = Math.sin(angle) * distance;
+                
+                particle.style.left = '50%';
+                particle.style.top = '50%';
+                particle.style.setProperty('--tx', `${tx}px`);
+                particle.style.setProperty('--ty', `${ty}px`);
+                particle.style.animationDelay = `${Math.random() * 0.3}s`;
+                
+                particlesContainer.appendChild(particle);
+                
+                setTimeout(() => particle.remove(), 2000);
+            }
+
+            // Efecto de escala en el corazón
+            heart.style.transform = 'scale(1.3)';
+            setTimeout(() => {
+                heart.style.transform = '';
+            }, 150);
+
+            // Crear destellos
+            createSparkles();
+        }
+
+        function createSparkles() {
+            const wrapper = document.querySelector('.heart-wrapper');
+            for (let i = 0; i < 6; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle';
+                sparkle.style.left = `${20 + Math.random() * 60}%`;
+                sparkle.style.top = `${20 + Math.random() * 60}%`;
+                sparkle.style.animationDelay = `${Math.random() * 0.5}s`;
+                wrapper.appendChild(sparkle);
+                setTimeout(() => sparkle.remove(), 1500);
+            }
+        }
+
+        // Crear partículas automáticamente cada 3 segundos
+        setInterval(() => {
+            if (Math.random() > 0.5) {
+                createParticles();
+            }
+        }, 3000);
+
+        // Soporte de teclado
+        document.addEventListener('keydown', (event) => {
+            if (event.key === ' ' || event.key === 'Enter') {
+                event.preventDefault();
+                createParticles();
+            }
+        });
+    </script>
+</body>
+</html>
